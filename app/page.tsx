@@ -14,7 +14,7 @@ export default function HomePage() {
         </p>
 
         <Link
-          href="/upload"
+          href="/api/upload"
           className="
             inline-flex items-center justify-center
             px-6 py-3
