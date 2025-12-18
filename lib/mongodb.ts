@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-let mongoClient:Promise<MongoClient> | undefined;
+let mongoClient:Promise<MongoClient> ;
 
 declare global {
     var _globalmongoclient: Promise<MongoClient> | undefined;

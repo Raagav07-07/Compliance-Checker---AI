@@ -1,11 +1,20 @@
 import mongoClient from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import {pdfToText} from 'pdf-ts'
+export async function GET(){
+    try{
+        const client= await mongoClient;
+        const db=await client.db("ComplianceChecker")
+        const post=await db.collection("policies").find({},{projection:{text:0}}).sort({createdAt:-1}).toArray();
+        return NextResponse.json(post)
+    }
+    catch(err){
+        console.error("Failed to fetch");
+        return NextResponse.json({error:"Failed to fetch policies"},{status:500});
+    }
+}
 export async function POST(req:Request){
     try{
-         const client=await mongoClient;
-    const db=client?.db("ComplianceChecker");
-    }catch(err){throw new error("Connection failed")}
     const client=await mongoClient;
     const db=client?.db("ComplianceChecker");
     const formData=await req.formData();
@@ -21,7 +30,7 @@ const buffer = Buffer.from(arrayBuffer);
         console.log(text);
       const collection = db.collection("policies");
 
-try{
+
 await collection.insertOne({
   name,
   text,
@@ -29,7 +38,8 @@ await collection.insertOne({
   status: "ACTIVE",
   indexed: false,
   createdAt: new Date(),
-  updatedAt: new Date(),})}
-  catch(err){throw new error("Failed to insert")}
-    return NextResponse.json({message:"Policy uploaded successfully"});
+  updatedAt: new Date(),})  
+  return NextResponse.json({message:"Policy uploaded successfully"});
+} 
+  catch(err){throw new Error("Failed to insert")}
 }
