@@ -1,6 +1,8 @@
-import { chromaClient } from "./chroma";
+import { getChromaClientSingleton } from "./chroma";
+
 export async function getCreateCollection(){
-    return await chromaClient.getOrCreateCollection(
+    const client = getChromaClientSingleton();
+    return await client.getOrCreateCollection(
         {name:"Policy_vectors",metadata:{description:"Policy RAG Embeddings"}}
     );
 }
