@@ -7,33 +7,49 @@ type Domain = "IT" | "RETAIL" | "CUSTOM" | "";
 export default function UploadPage() {
   const [domain, setDomain] = useState<Domain>("");
   const [file, setFile] = useState<File | null>(null);
-
   const [policyName, setPolicyName] = useState("");
   const [region, setRegion] = useState("");
   const [customDomain, setCustomDomain] = useState("");
-  async function handleSubmit(){
-  if(!file || !domain) 
-    return ;
-  let formdata=new FormData();
-  formdata.append("file",file);
-  formdata.append("name",policyName);
-  if(domain==="IT"){
-    formdata.append("Category","IT");
-  }
-  else if(domain==="RETAIL"){
-    formdata.append("Category","Retail");
-  }
-  else if(domain==="CUSTOM"){
-    formdata.append("Category","Custom"); 
-}
-    const res=await fetch('/api/policy',{
-      method:'POST',
-      body:formdata
+  const [status, setStatus] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!file || !domain) return;
+
+    setIsSubmitting(true);
+    setStatus("");
+
+    const formdata = new FormData();
+    formdata.append("file", file);
+    formdata.append("name", policyName || region || customDomain);
+
+    if (domain === "IT") {
+      formdata.append("Category", "IT");
+    } else if (domain === "RETAIL") {
+      formdata.append("Category", "RETAIL");
+    } else if (domain === "CUSTOM") {
+      formdata.append("Category", "CUSTOM");
+    }
+
+    const res = await fetch("/api/policy", {
+      method: "POST",
+      body: formdata,
     });
-    const data=await res.json();
-    console.log(data);
-    
-}
+    const data = await res.json();
+
+    if (!res.ok) {
+      setStatus(data.error || "Upload failed");
+    } else {
+      setStatus("Policy uploaded successfully.");
+      setFile(null);
+      setPolicyName("");
+      setRegion("");
+      setCustomDomain("");
+    }
+
+    setIsSubmitting(false);
+  };
+
   const canSubmit =
     domain &&
     file &&
@@ -42,146 +58,122 @@ export default function UploadPage() {
       (domain === "CUSTOM" && customDomain));
 
   return (
-    <div
-      className="
-        min-h-screen flex items-center justify-center relative overflow-hidden
-        bg-gradient-to-br from-slate-500/20 via-teal-500/20 to-indigo-500/20
-        bg-[length:400%_400%]
-        animate-[aiGradient_18s_ease_infinite]
-      "
-    >
-      {/* Subtle AI glow */}
-      <div
-        className="
-          absolute inset-0 -z-10 blur-3xl opacity-25
-          bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-400
-        "
-      />
-
-      {/* Glass Card */}
-      <div
-        className="
-          w-[600px] max-w-[92%]
-          rounded-2xl bg-indigo-50/90
-          border border-indigo-200
-          shadow-2xl p-8
-        "
-      >
-        <h1 className="text-2xl text-center font-semibold text-slate-800 mb-6">
-          Upload Document
-        </h1>
-
-        {/* Domain Selector */}
-        <div className="mb-6">
-          <div className="flex justify-between gap-3">
-            {["IT", "RETAIL", "CUSTOM"].map((d) => (
-              <button
-                key={d}
-                onClick={() => setDomain(d as Domain)}
-                className={`flex-1 px-4 py-2 rounded-lg border text-sm font-medium transition
-                  ${
-                    domain === d
-                      ? "bg-teal-600 text-white border-teal-600"
-                      : "bg-white/70 text-slate-700 border-slate-300 hover:bg-white"
-                  }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
+    <main className="min-h-screen px-6 pb-16 pt-10">
+      <div className="mx-auto w-full max-w-4xl">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+            Policy upload
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold text-slate-900">
+            Upload policy documents
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Add policies, label the domain, and prepare them for indexing.
+          </p>
         </div>
 
-        {/* File Upload */}
-        {domain && (
-          <div className="mb-6">
-            <label
-              className="
-                flex flex-col items-center justify-center
-                border-2 border-dashed border-indigo-300
-                rounded-xl p-8 text-slate-600
-                cursor-pointer bg-white/50
-                hover:bg-indigo-100/50 transition
-              "
-            >
-              <span className="text-lg mb-1">📄 Upload PDF</span>
-              <span className="text-xs text-slate-500">
-                Click to select PDF / DOCX
-              </span>
-              <input
-                type="file"
-                accept=".pdf,.docx"
-                hidden
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
-            </label>
-
-            {file && (
-              <p className="mt-2 text-sm text-slate-600 truncate">
-                {file.name}
+        <section className="mt-8 rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm">
+          <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
+            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+              <h2 className="text-lg font-semibold text-slate-900">Select domain</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Choose the policy category for accurate retrieval and scoring.
               </p>
-            )}
+              <div className="mt-4 space-y-2">
+                {["IT", "RETAIL", "CUSTOM"].map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDomain(d as Domain)}
+                    className={`w-full rounded-xl border px-4 py-2 text-left text-sm font-semibold transition ${
+                      domain === d
+                        ? "border-emerald-600 bg-emerald-600 text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Policy file
+                </label>
+                <label className="mt-2 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white px-6 py-10 text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50">
+                  <span className="text-sm font-semibold text-slate-700">
+                    Drop PDF/DOCX or click to upload
+                  </span>
+                  <span className="mt-2 text-xs text-slate-500">
+                    Max 10MB · PDF or DOCX
+                  </span>
+                  <input
+                    type="file"
+                    accept=".pdf,.docx"
+                    hidden
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  />
+                </label>
+                {file && (
+                  <p className="mt-2 text-xs text-slate-500">{file.name}</p>
+                )}
+              </div>
+
+              {domain === "IT" && (
+                <input
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Policy name"
+                  value={policyName}
+                  onChange={(e) => setPolicyName(e.target.value)}
+                />
+              )}
+
+              {domain === "RETAIL" && (
+                <input
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Region (e.g., India)"
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                />
+              )}
+
+              {domain === "CUSTOM" && (
+                <input
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Custom domain name"
+                  value={customDomain}
+                  onChange={(e) => setCustomDomain(e.target.value)}
+                />
+              )}
+
+              {status && (
+                <div
+                  className={`rounded-2xl border px-4 py-3 text-sm ${
+                    status.includes("failed") || status.includes("Upload failed")
+                      ? "border-rose-200 bg-rose-50 text-rose-600"
+                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  }`}
+                >
+                  {status}
+                </div>
+              )}
+
+              <button
+                disabled={!canSubmit || isSubmitting}
+                onClick={handleSubmit}
+                className={`w-full rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  canSubmit && !isSubmitting
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "cursor-not-allowed bg-slate-200 text-slate-400"
+                }`}
+              >
+                {isSubmitting ? "Uploading..." : "Upload policy"}
+              </button>
+            </div>
           </div>
-        )}
-
-        {/* Domain Inputs */}
-        {domain === "IT" && (
-          <input
-            className="
-              w-full mb-4 px-3 py-2
-              bg-white/60 border border-indigo-200
-              rounded-lg text-sm text-slate-700
-              focus:outline-none focus:ring-2 focus:ring-teal-500
-            "
-            placeholder="Policy Name"
-            value={policyName}
-            onChange={(e) => setPolicyName(e.target.value)}
-          />
-        )}
-
-        {domain === "RETAIL" && (
-          <input
-            className="
-              w-full mb-4 px-3 py-2
-              bg-white/60 border border-indigo-200
-              rounded-lg text-sm text-slate-700
-              focus:outline-none focus:ring-2 focus:ring-teal-500
-            "
-            placeholder="Region (e.g. India)"
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-          />
-        )}
-
-        {domain === "CUSTOM" && (
-          <input
-            className="
-              w-full mb-4 px-3 py-2
-              bg-white/60 border border-indigo-200
-              rounded-lg text-sm text-slate-700
-              focus:outline-none focus:ring-2 focus:ring-teal-500
-            "
-            placeholder="Domain Name"
-            value={customDomain}
-            onChange={(e) => setCustomDomain(e.target.value)}
-          />
-        )}
-
-        {/* Submit */}
-        <button
-          disabled={!canSubmit}
-          onClick={() => {
-            handleSubmit();
-          }}
-          className={`w-full py-3 rounded-xl text-sm font-medium transition
-            ${
-              canSubmit
-                ? "bg-teal-600 text-white hover:bg-teal-700"
-                : "bg-teal-500 text-white cursor-not-allowed"
-            }`}
-        >
-          Upload Document
-        </button>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
