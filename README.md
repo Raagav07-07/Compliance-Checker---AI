@@ -1,16 +1,16 @@
 # AI Compliance Checker
 
-An intelligent, multi-agent compliance checking system built with **Next.js**, **Mastra AI**, and **RAG (Retrieval-Augmented Generation)**. Upload documents, automatically detect categories, analyze against company policies, and receive detailed violation scores with actionable recommendations.
+An intelligent, multi-agent compliance checking system built with **Next.js**, **Mastra**, and **RAG (Retrieval-Augmented Generation)**. Upload policies, analyze documents, and receive structured compliance reports with violations, scores, and recommendations.
 
 ## Features
 
-- **Multi-Agent Architecture**: 6 specialized AI agents working together
-- **Auto-Classification**: Automatically detects document category (IT, RETAIL, CUSTOM)
-- **RAG-Powered Analysis**: Semantic search retrieves relevant policies for accurate analysis
-- **Violation Scoring**: Severity-weighted scoring algorithm (0-100 scale)
-- **Actionable Recommendations**: Step-by-step fixes prioritized by severity
-- **Comprehensive Reports**: Executive summaries with detailed breakdowns
-- **Audit Trail**: All analyses stored with configurable retention
+- **Multi-Agent Architecture**: 6 specialized agents orchestrated by Mastra workflows
+- **Auto-Classification**: Category detection with confidence scoring
+- **RAG-Powered Analysis**: Semantic policy retrieval before scoring
+- **Violation Scoring**: Severity-weighted score (0-100)
+- **Actionable Recommendations**: Prioritized remediation guidance
+- **Comprehensive Reports**: Executive summary, metrics, and evidence
+- **Audit Trail**: Analysis history with retention policies
 - **Modern Stack**: Next.js 16, TypeScript, MongoDB, Chroma DB
 
 ## Architecture
@@ -59,8 +59,8 @@ An intelligent, multi-agent compliance checking system built with **Next.js**, *
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **AI Orchestration**: Mastra AI
-- **LLM**: Google Gemini 1.5 Flash
+- **AI Orchestration**: Mastra
+- **LLM**: Hugging Face Inference (meta-llama/Llama-3.3-70B-Instruct)
 - **Embeddings**: Hugging Face BGE-small-en-v1.5
 - **Vector Store**: Chroma DB
 - **Database**: MongoDB Atlas
@@ -72,8 +72,7 @@ An intelligent, multi-agent compliance checking system built with **Next.js**, *
 
 - **Node.js** 18 or higher
 - **MongoDB Atlas** account (free tier available)
-- **Google Gemini API** key (get from [Google AI Studio](https://aistudio.google.com))
-- **Hugging Face** API token (for embeddings - get from [huggingface.co](https://huggingface.co/settings/tokens))
+- **Hugging Face** API token (LLM + embeddings - get from [huggingface.co](https://huggingface.co/settings/tokens))
 - **Docker** (optional, for ChromaDB - Docker Desktop recommended)
 
 ### Installation & Setup
@@ -101,11 +100,11 @@ Edit `.env.local` and add your credentials:
 # MongoDB
 MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority"
 
-# Google Gemini API
-GEMINI_API_KEY="your_gemini_api_key_here"
-
-# Hugging Face Token (for embeddings)
+# Hugging Face Token (LLM + embeddings)
 hf_token="hf_xxxxxxxxxxxxxxxxxx"
+
+# Optional: Override LLM model
+HF_LLM_MODEL="meta-llama/Llama-3.3-70B-Instruct"
 
 # Optional: ChromaDB Server URL
 # If not set, ChromaDB will run in in-memory mode (data lost on restart)
@@ -319,11 +318,11 @@ NODE_ENV=development               # development or production
   2. Verify connection string format
   3. Test with: `curl -X POST http://localhost:3000/api/test-db`
 
-**Problem**: Gemini API errors
+**Problem**: Hugging Face text generation failed
 - **Solution**:
-  1. Verify API key is valid and has billing enabled
-  2. Check rate limits
-  3. Test with smaller documents first
+  1. Verify `hf_token` is valid
+  2. Accept the model license on Hugging Face if gated
+  3. Retry with a smaller document
 
 ---
 
@@ -732,7 +731,7 @@ This project is licensed under the MIT License.
 ## Acknowledgments
 
 - [Mastra AI](https://mastra.ai) - Agent orchestration framework
-- [Google Gemini](https://ai.google.dev) - LLM provider
+- [Hugging Face](https://huggingface.co) - LLM + embeddings
 - [Hugging Face](https://huggingface.co) - Embedding models
 - [Chroma](https://www.trychroma.com) - Vector database
 - [Next.js](https://nextjs.org) - React framework
